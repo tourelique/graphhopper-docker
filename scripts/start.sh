@@ -1,18 +1,19 @@
 #!/bin/sh
 
-if [ -z "$OSM_FILE" ]; then
-  OSM_FILE=`ls /data/*.pbf`
+if [ -z "$OSM_URL" ]; then
+  OSM_URL='https://download.geofabrik.de/europe/netherlands-latest.osm.pbf'
 fi
 
 if [ -z "${JAVA_OPTS}" ]; then
-    JAVA_OPTS="$JAVA_OPTS -Xms64m -Xmx1024m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"
+    JAVA_OPTS="$JAVA_OPTS -Xms128m -Xmx2G -Djava.net.preferIPv4Stack=true"
     JAVA_OPTS="$JAVA_OPTS -server -Djava.awt.headless=true -Xconcurrentio"
     echo "Setting default JAVA_OPTS"
 fi
 
-RUN_ARGS=" -jar $HOME/*.jar jetty.resourcebase=$HOME/webapp config=$HOME/config.properties datareader.file=$OSM_FILE"
+RUN_ARGS=" -jar $HOME/*.jar server config=$HOME/config.properties $OSM_FILE"
 
 echo "JAVA_OPTS= ${JAVA_OPTS}"
 echo "RUN_ARGS= ${RUN_ARGS}"
 
-java $JAVA_OPTS $RUN_ARGS
+wget --progress=bar:force:noscroll -P data/ $OSM_URL
+java -jar *.jar server config.yaml

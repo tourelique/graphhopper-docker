@@ -1,21 +1,19 @@
 FROM openjdk:8-jre
 
-ARG OSM_FILES
-ENV OSM_FILES=${OSM_FILES}
+ARG OSM_URL
+ENV OSM_URL=${OSM_URL}
 
 ENV HOME /home/graphhopper
 
-ENV GRAPHHOPPER_URL https://oss.sonatype.org/content/groups/public/com/graphhopper/graphhopper-web/0.8.2/graphhopper-web-0.8.2-bin.zip
+ENV GRAPHHOPPER_URL https://graphhopper.com/public/releases/graphhopper-web-2.2.jar
 
-RUN wget $GRAPHHOPPER_URL -P /tmp && unzip /tmp/graphhopper*.zip -d $HOME && rm /tmp/*.zip
+RUN wget --progress=bar:force:noscroll $GRAPHHOPPER_URL -P $HOME/
 
 ADD scripts $HOME
-ADD properties $HOME
-
-VOLUME ["/data"]
+ADD config.yaml $HOME/
 
 EXPOSE 8989
 
 WORKDIR $HOME
 
-CMD ["./start.sh"]
+ENTRYPOINT ["./start.sh"]

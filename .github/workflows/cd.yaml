@@ -1,0 +1,30 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Continuous Deployment
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [push, pull_request]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        name: Checkout repository
+      - name: ACR Login
+        run: az acr login --name treliq --username ${{ secrets.ACR_SP_ID }} --password ${{ secrets.ACR_SP_PW }}
+      - name: Docker Build
+        run: docker build -t treliq.azurecr.io/tourelique-gh:latest -t treliq.azurecr.io/tourelique-gh:${{ github.run_number }} .
+      - name: Docker Push
+        run: |
+          docker push treliq.azurecr.io/tourelique-gh:latest
+          docker push treliq.azurecr.io/tourelique-gh:${{ github.run_number }}
+        if: github.ref == 'refs/heads/master'
+      
